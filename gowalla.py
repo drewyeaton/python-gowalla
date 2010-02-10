@@ -22,6 +22,7 @@ __version__ = '0.9-devel'
 
 import base64
 import types
+import urllib
 import urllib2
 from urllib2 import URLError, HTTPError
 
@@ -29,8 +30,6 @@ import simplejson
 
 
 URL = 'http://gowalla.com'
-
-FORMAT = 'json'
 
 # Names of each action and its related request method
 CRUD_METHODS = {
@@ -89,17 +88,16 @@ class Gowalla(object):
         args = ''
         if method == 'GET' and kwargs:
             args = "?%s" % (urllib.urlencode(kwargs.items()))
-
+        
         # Build url from the pieces
-        url = "%s%s%s.%s" % (URL, '/'.join(urili), args, FORMAT)
-
-        # print url
-
+        url = "%s%s%s" % (URL, '/'.join(urili), args)
+        
         # Build request with our new url, method, and data
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         self._request = urllib2.Request(url=url, data=data)
         self._request.get_method = lambda: method
-        self._request.add_header('Content-Type', 'application/xml')
+        self._request.add_header('Content-Type', 'application/json')
+        self._request.add_header('Accept', 'application/json')
         self._request.add_header('Authorization', 'Basic %s' % base64.encodestring('%s:%s' % (self.username, self.password))[:-1])
 
         try:                        
@@ -109,11 +107,9 @@ class Gowalla(object):
             raise GowallaError(e)
         except URLError, e:
             raise GowallaConnectionError(e)
-        
-        self.response = simplejson.loads(json_response)
-        
-        # print self.response
                 
+        self.response = simplejson.loads(json_response)
+                        
         return self.response
         
         

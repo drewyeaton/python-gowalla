@@ -30,10 +30,13 @@ from gowalla import Gowalla, GowallaError
 USERNAME = ''
 PASSWORD = ''
 
-TEST_USERNAME = ''
-TEST_SPOT_ID = ''
-TEST_ITEM_ID = ''
-TEST_TRIP_ID = ''
+TEST_USERNAME = 'xeeton'
+TEST_SPOT_ID = '48462'
+TEST_ITEM_ID = '608124'
+TEST_TRIP_ID = '89'
+TEST_SPOT_LAT = '30.2697'
+TEST_SPOT_LNG = '-97.7494'
+TEST_SPOT_RADIUS = '50'
 
 
 class UserTestCase(unittest.TestCase):
@@ -57,6 +60,15 @@ class UserTestCase(unittest.TestCase):
 
 
 class SpotTestCase(unittest.TestCase):
+    def test_list_spots(self):
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        
+        list_result = gowalla.spots(lat=TEST_SPOT_LAT, lng=TEST_SPOT_LNG, radius=TEST_SPOT_RADIUS)
+
+        self.assertEqual(type(list_result), types.DictType)
+        self.assertNotEqual(list_result['spots'], None)
+        
+    
     def test_get_spot(self):
         gowalla = Gowalla(username=USERNAME, password=PASSWORD)
 
