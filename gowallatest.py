@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-'''A minimalist Python interface for the Recurly API'''
+'''A minimalist Python interface for the Gowalla API'''
 
 __author__ = 'Drew Yeaton <drew@sentineldesign.net>'
 __version__ = '0.9-devel'
