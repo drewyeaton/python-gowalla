@@ -17,7 +17,7 @@
 '''A minimalist Python interface for the Gowalla API'''
 
 __author__ = 'Drew Yeaton <drew@sentineldesign.net>'
-__version__ = '0.9-devel'
+__version__ = '0.9.1-devel'
 
 
 import base64
@@ -40,20 +40,30 @@ CRUD_METHODS = {
     }
 
 
-class GowallaError(Exception): pass
-class GowallaConnectionError(Exception): pass
+class GowallaException(Exception): pass
+class GowallaConnectionException(GowallaException): pass
+
+class GowallaResourceInvalidException(GowallaException): pass
+class GowallaUnauthorizedException(GowallaException): pass
+class GowallaResourceNotFoundException(GowallaException): pass
+class GowallaMethodNotAllowedException(GowallaException): pass
+class GowallaNotAcceptableException(GowallaException): pass
+class GowallaApplicationErrorException(GowallaException): pass
+
 
 
 class Gowalla(object):
     username = ''
     password = ''
+    api_key =''
     uri = ''
     response = None
     errors = None
     
-    def __init__(self, username='', password='', uri=''):
+    def __init__(self, username='', password='', api_key='', uri=''):
         self.username = username
         self.password = password
+        self.api_key = api_key
         self.uri = uri
     
     
@@ -61,7 +71,7 @@ class Gowalla(object):
         try:
             return object.__getattr__(self, k)
         except AttributeError:
-            return Gowalla(self.username, self.password, self.uri + '/' + k)
+            return Gowalla(self.username, self.password, self.api_key, self.uri + '/' + k)
     
     
     def __call__(self, **kwargs):
@@ -96,17 +106,33 @@ class Gowalla(object):
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         self._request = urllib2.Request(url=url, data=data)
         self._request.get_method = lambda: method
-        self._request.add_header('Content-Type', 'application/json')
         self._request.add_header('Accept', 'application/json')
+        self._request.add_header('Content-Type', 'application/json')
         self._request.add_header('Authorization', 'Basic %s' % base64.encodestring('%s:%s' % (self.username, self.password))[:-1])
+        self._request.add_header('-Gowalla-API-Key', self.api_key)
 
         try:                        
             response = opener.open(self._request)
             json_response = response.read()
         except HTTPError, e:
-            raise GowallaError(e)
+            if e.code in range(200, 205):
+                pass
+            elif e.code == 400:
+                raise GowallaResourceInvalidException(e.read())
+            elif e.code == 401:
+                raise GowallaUnauthorizedException(e)
+            elif e.code == 404:
+                raise GowallaResourceNotFoundException(e)
+            elif e.code == 405:
+                raise GowallaMethodNotAllowedException(e)
+            elif e.code == 406:
+                raise GowallaNotAcceptableException(e)
+            elif e.code == 500:
+                raise GowallaApplicationErrorException(e)
+            else:
+                raise GowallaException(e)
         except URLError, e:
-            raise GowallaConnectionError(e)
+            raise GowallaConnectionException(e)
                 
         self.response = simplejson.loads(json_response)
                         

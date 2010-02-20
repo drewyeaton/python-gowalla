@@ -17,18 +17,19 @@
 '''A minimalist Python interface for the Gowalla API'''
 
 __author__ = 'Drew Yeaton <drew@sentineldesign.net>'
-__version__ = '0.9-devel'
+__version__ = '0.9.1-devel'
 
 
 import sys
 import unittest
 import types
 
-from gowalla import Gowalla, GowallaError
+from gowalla import Gowalla, GowallaException
 
 
 USERNAME = ''
 PASSWORD = ''
+API_KEY = ''
 
 TEST_USERNAME = 'xeeton'
 TEST_SPOT_ID = '48462'
@@ -41,27 +42,25 @@ TEST_SPOT_RADIUS = '50'
 
 class UserTestCase(unittest.TestCase):
     def test_get_user(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
         
         get_result = gowalla.users(id=TEST_USERNAME)
         
         self.assertEqual(type(get_result), types.DictType)
         self.assertNotEqual(get_result['first_name'], None)
-        self.assertEqual(get_result['username'], TEST_USERNAME)
     
     
     def test_list_friends(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
 
         get_result = gowalla.users.friends(id=TEST_USERNAME)
 
-        # This method appears to be non-functional at the moment
         self.assertEqual(type(get_result), types.DictType)
 
 
 class SpotTestCase(unittest.TestCase):
     def test_list_spots(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
         
         list_result = gowalla.spots(lat=TEST_SPOT_LAT, lng=TEST_SPOT_LNG, radius=TEST_SPOT_RADIUS)
 
@@ -70,7 +69,7 @@ class SpotTestCase(unittest.TestCase):
         
     
     def test_get_spot(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
 
         get_result = gowalla.spots(id=TEST_SPOT_ID)
 
@@ -80,25 +79,25 @@ class SpotTestCase(unittest.TestCase):
 
 class ItemTestCase(unittest.TestCase):
     def test_list_items(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
     
         list_result = gowalla.items()
-    
-        self.assertEqual(type(list_result), types.ListType)
-        self.assertNotEqual(list_result[0]['issue_number_str'], None)
+        
+        self.assertEqual(type(list_result), types.DictType)
+        self.assertNotEqual(list_result['items'][0]['issue_number'], None)
     
     
     def test_get_item(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
     
         get_result = gowalla.items(id=TEST_ITEM_ID)
-    
+        
         self.assertEqual(type(get_result), types.DictType)
-        self.assertNotEqual(get_result['issue_number_str'], None)
+        self.assertNotEqual(get_result['issue_number'], None)
     
     
     def test_list_vaulted_items(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
     
         list_result = gowalla.users.vault(id=TEST_USERNAME)
     
@@ -107,7 +106,7 @@ class ItemTestCase(unittest.TestCase):
     
     
     def test_list_spots_items(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
     
         list_result = gowalla.users.vault(id=TEST_USERNAME)
     
@@ -117,16 +116,16 @@ class ItemTestCase(unittest.TestCase):
 
 class TripTestCase(unittest.TestCase):
     def test_list_trips(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
     
         list_result = gowalla.trips()
-    
-        self.assertEqual(type(list_result), types.ListType)
-        self.assertNotEqual(list_result[0]['name'], None)
+            
+        self.assertEqual(type(list_result), types.DictType)
+        self.assertNotEqual(list_result['trips'][0]['name'], None)
     
     
     def test_get_trip(self):
-        gowalla = Gowalla(username=USERNAME, password=PASSWORD)
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
 
         get_result = gowalla.trips(id=TEST_TRIP_ID)
 
@@ -134,14 +133,14 @@ class TripTestCase(unittest.TestCase):
         self.assertNotEqual(get_result['description'], None)
 
 
-# class EventTestCase(unittest.TestCase):
-#     def test_get_item_events(self):
-#         gowalla = Gowalla(username=USERNAME, password=PASSWORD)
-#         
-#         get_list = gowalla.items.events(id=TEST_ITEM_ID)
-#         
-#         self.assertEqual(type(get_list), types.DictType)
-#         self.assertNotEqual(get_result['creator'], None)
+class EventTestCase(unittest.TestCase):
+    def test_get_item_events(self):
+        gowalla = Gowalla(username=USERNAME, password=PASSWORD, api_key=API_KEY)
+        
+        get_list = gowalla.items.events(id=TEST_ITEM_ID)
+                
+        self.assertEqual(type(get_list), types.DictType)
+        self.assertNotEqual(get_list['events'][0]['type'], None)
 
 
 if __name__ == "__main__":
