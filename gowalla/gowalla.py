@@ -17,7 +17,7 @@
 '''A minimalist Python interface for the Gowalla API'''
 
 __author__ = 'Drew Yeaton <drew@sentineldesign.net>'
-__version__ = '0.9.1-devel'
+__version__ = '1.0'
 
 
 import base64
@@ -137,6 +137,15 @@ class Gowalla(object):
         self.response = simplejson.loads(json_response)
                         
         return self.response
-        
-        
-    
+
+__all__ = [
+        'Gowalla',
+        'GowallaException',
+        'GowallaConnectionException',
+        'GowallaResourceInvalidException',
+        'GowallaUnauthorizedException',
+        'GowallaResourceNotFoundException',
+        'GowallaMethodNotAllowedException',
+        'GowallaNotAcceptableException',
+        'GowallaApplicationErrorException',
+    ]
